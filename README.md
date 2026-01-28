@@ -13,6 +13,21 @@ Small Java project demonstrating a Google Agent Development Kit (ADK) agent that
 - Maven 3.9 or later
 - A valid Google API key
 
+## Architecture
+```
+User Question
+↓
+Gemini LLM (decides what tool to use)
+↓
+getCurrentTime("London") ← Your Java function executes
+↓
+Returns: {"city": "London", "time": "3:45 PM"}
+↓
+Gemini LLM (formats natural response)
+↓
+User gets answer
+```
+
 ## Environment (API key)
 This project includes an `env.bat` helper (located at the project root of the `agent` module):
 
