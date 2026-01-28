@@ -5,6 +5,9 @@ import com.google.adk.agents.LlmAgent;
 import com.google.adk.tools.Annotations.Schema;
 import com.google.adk.tools.FunctionTool;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 public class HelloTimeAgent {
@@ -23,13 +26,42 @@ public class HelloTimeAgent {
                 .build();
     }
 
-    /** Mock tool implementation */
+    /** tool implementation */
     @Schema(description = "Get the current time for a given city")
     public static Map<String, String> getCurrentTime(
             @Schema(name = "city", description = "Name of the city to get the time for") String city) {
-        return Map.of(
-                "city", city,
-                "forecast", "The time is 10:30am."
-        );
+
+        try {
+            // Map cities to timezones
+            Map<String, String> cityToZone = Map.ofEntries(
+                    Map.entry("new york", "America/New_York"),
+                    Map.entry("los angeles", "America/Los_Angeles"),
+                    Map.entry("chicago", "America/Chicago"),
+                    Map.entry("london", "Europe/London"),
+                    Map.entry("paris", "Europe/Paris"),
+                    Map.entry("tokyo", "Asia/Tokyo"),
+                    Map.entry("sydney", "Australia/Sydney"),
+                    Map.entry("dubai", "Asia/Dubai"),
+                    Map.entry("singapore", "Asia/Singapore")
+            );
+
+            String normalizedCity = city.toLowerCase().trim();
+            String zoneIdString = cityToZone.getOrDefault(normalizedCity, "UTC");
+            ZoneId zoneId = ZoneId.of(zoneIdString);
+
+            // Get current time
+            ZonedDateTime now = ZonedDateTime.now(zoneId);
+            String timeString = now.format(DateTimeFormatter.ofPattern("h:mm a"));
+
+            return Map.of(
+                    "city", city,
+                    "time", timeString
+            );
+        } catch (Exception e) {
+            return Map.of(
+                    "city", city,
+                    "error", "Could not find timezone for " + city
+            );
+        }
     }
 }
